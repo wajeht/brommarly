@@ -1,2 +1,2 @@
 # Brommarly
-Replace corporate l anguage with bro tal
+replace corporate language with bro talk
