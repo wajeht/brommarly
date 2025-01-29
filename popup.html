@@ -1,28 +1,37 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Textarea Overlay</title>
     <style>
         body {
-            width: 300px;
+            width: 250px;
             padding: 10px;
         }
+
         #count {
             font-weight: bold;
             color: blue;
         }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            width: 100%;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
         }
-        input, select {
+
+        input,
+        select {
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
+            box-sizing: border-box;
         }
+
         button {
             background: #4285f4;
             color: white;
@@ -30,16 +39,16 @@
             padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
+            width: 100%;
         }
+
         button:hover {
             background: #3367d6;
         }
     </style>
 </head>
-<body>
-    <h3>Textarea Overlay</h3>
-    <p>Found <span id="count">0</span> textareas on this page.</p>
 
+<body>
     <div class="form-group">
         <label for="apiKey">API Key:</label>
         <input type="password" id="apiKey" placeholder="Enter your API key">
@@ -48,14 +57,14 @@
     <div class="form-group">
         <label for="model">Model:</label>
         <select id="model">
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
             <option value="gpt-4">GPT-4</option>
-            <option value="claude-3-opus">Claude-3 Opus</option>
-            <option value="claude-3-sonnet">Claude-3 Sonnet</option>
         </select>
     </div>
 
     <button id="saveSettings">Save Settings</button>
     <script src="popup.js"></script>
 </body>
+
 </html>
