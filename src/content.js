@@ -7,11 +7,15 @@ function createButton(textarea) {
   button.textContent = '🗿';
   button.style.cssText = `
     position: absolute;
-    background: #4285f4;
+    background: white;
+    border: solid 1px lightgrey;
     color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 12px;
     z-index: 10000;
