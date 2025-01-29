@@ -5,7 +5,8 @@
  "description": "A personal AI assistant that seamlessly embeds into every text area",
   "permissions": ["activeTab", "storage"],
   "action": {
-    "default_popup": "./src/popup.html"
+    "default_popup": "./src/popup.html",
+    "default_icon": "./assets/chad.png"
   },
   "content_scripts": [
     {
