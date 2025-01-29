@@ -1,2 +1,2 @@
-# Brommarly
-replace corporate language with bro talk
+# Chad
+Personal AI assistant
