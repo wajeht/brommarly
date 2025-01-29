@@ -4,7 +4,7 @@ const processedTextareas = new WeakSet();
 // Create a button for a textarea
 function createButton(textarea) {
   const button = document.createElement('button');
-  button.textContent = '📋';
+  button.textContent = '🗿';
   button.style.cssText = `
     position: absolute;
     background: #4285f4;
