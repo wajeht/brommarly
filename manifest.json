@@ -1,10 +1,10 @@
-edm
+{
   "name": "Brommarly",
   "description": "Replace corporate l anguage with bro talk",
   "version": "1.0",
   "manifest_version": 3,
   "action": {
-    "default_popup": "./src/index.png",
-    "default_icon": "./src/logo.png.png"
+    "default_popup": "./src/index.html",
+    "default_icon": "./src/logo.png"
   }
 }
