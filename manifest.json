@@ -3,7 +3,7 @@
   "name": "Textarea Overlay",
   "version": "1.0",
   "description": "Shows clickable overlays on textareas",
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab", "storage"],
   "action": {
     "default_popup": "popup.html"
   },

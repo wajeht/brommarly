@@ -26,9 +26,84 @@ function createButton(textarea) {
   };
 
   // Add click handler
-  button.addEventListener('click', (e) => {
+  button.addEventListener('click', async (e) => {
     e.stopPropagation();
-    alert(textarea.value);
+
+    // Get settings from storage
+    const settings = await chrome.storage.sync.get(['apiKey', 'model']);
+
+    if (!settings.apiKey || !settings.model) {
+        alert('Please configure your API key and model in the extension popup');
+        return;
+    }
+
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${settings.apiKey}`
+            },
+            body: JSON.stringify({
+                model: settings.model,
+                messages: [
+                    {
+                        role: 'user',
+                        content: textarea.value
+                    }
+                ],
+                stream: true
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('API request failed');
+        }
+
+        // Clear the textarea before starting
+        const originalText = textarea.value;
+        textarea.value = '';
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            // Decode the chunk
+            const chunk = decoder.decode(value);
+
+            // Split into lines and process each one
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+                if (line.trim() === '') continue;
+                if (line.trim() === 'data: [DONE]') continue;
+                if (!line.startsWith('data: ')) continue;
+
+                try {
+                    // Parse the JSON data
+                    const jsonData = JSON.parse(line.replace('data: ', ''));
+                    const content = jsonData.choices[0]?.delta?.content;
+
+                    if (content) {
+                        // Append the new content to the textarea
+                        textarea.value += content;
+                        // Scroll to the bottom of the textarea
+                        textarea.scrollTop = textarea.scrollHeight;
+                    }
+                } catch (error) {
+                    console.error('Error parsing chunk:', error);
+                }
+            }
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error making API request: ' + error.message);
+        // Restore original text in case of error
+        textarea.value = originalText;
+    }
   });
 
   // Append button to the document
