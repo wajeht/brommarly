@@ -1,3 +1,4 @@
+
 // Cache for tracking textareas that already have buttons
 const processedTextareas = new WeakSet();
 
@@ -61,7 +62,7 @@ async function handleButtonClick(textarea) {
 
 // Get settings from storage
 async function getSettings() {
-    return await chrome.storage.sync.get(['apiKey', 'model']);
+    return await chrome.storage.sync.get(['apiKey', 'model', 'ignoredUrls']);
 }
 
 // Fetch chat completion from OpenAI API
@@ -133,6 +134,18 @@ function processChunk(chunk, textarea) {
 
 // Find all textareas and create buttons for them
 function createOverlays() {
+    getSettings()
+        .then((res) => {
+            const urls = res.ignoredUrls.split('\n');
+            if (urls.includes(window.location.href)) {
+                console.log('skipped on ', window.location.href);
+                return;
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+
     const textareas = document.querySelectorAll('textarea');
 
     textareas.forEach((textarea) => {
