@@ -1,4 +1,3 @@
-
 // Cache for tracking textareas that already have buttons
 const processedTextareas = new WeakSet();
 
