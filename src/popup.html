@@ -19,6 +19,11 @@
             margin-bottom: 5px;
         }
 
+        textarea {
+            max-width: 100%;
+            width: 100%;
+        }
+
         input,
         select {
             width: 100%;
@@ -44,6 +49,11 @@
 </head>
 
 <body>
+    <div class="form-group">
+        <label for="ignoredUrls">Ignored URLS</label>
+        <textarea id="ignoredUrls" rows="10"></textarea>
+    </div>
+
     <div class="form-group">
         <label for="apiKey">API Key:</label>
         <input type="password" id="apiKey" placeholder="Enter your API key">
