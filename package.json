@@ -7,7 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "zip": "node scripts/zip.js"
+    "zip": "node scripts/zip.js",
+    "rmds": "find . -name '.DS_Store' -delete"
+
   },
   "keywords": [
     "openai",
