@@ -62,17 +62,32 @@ const main = async () => {
       throw err;
     });
 
-    // Add files to the zip
+    // Add files to the zip (exclude unnecessary files/folders)
     archive.pipe(output);
-    archive.directory(extensionDir, false, { ignore: ['node_modules', 'bin', 'scripts', 'docs', '.git', 'package-lock.json', 'package.json'] }); // Exclude folders
+    archive.glob('**/*', {
+      cwd: extensionDir, // Current working directory
+      ignore: [
+        'node_modules/**', // Exclude node_modules
+        'bin/**', // Exclude bin folder
+        'scripts/**', // Exclude scripts folder
+        'docs/**', // Exclude docs folder
+        '.git/**', // Exclude .git folder
+        'package-lock.json', // Exclude package-lock.json
+        'package.json', // Exclude package.json
+        '.DS_Store', // Exclude macOS .DS_Store files
+        '*.log', // Exclude log files
+      ],
+    });
     archive.finalize();
 
     // Step 5: Push the new tag to GitHub
     console.log('Pushing new tag to GitHub...');
     await runCommand('git push main main --tags'); // Use "main" as the remote name
     console.log('Tag pushed to GitHub successfully!');
+    process.exit(0);
   } catch (error) {
     console.error('Error:', error);
+    process.exit(1);
   }
 };
 
