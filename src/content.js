@@ -1,14 +1,30 @@
 const processedTextareas = new WeakSet();
 let cachedSettings = null;
 
-createOverlays();
+main();
 
-// Refresh cache when settings change
-chrome.storage.onChanged.addListener(() => cachedSettings = null);
+function main() {
+    createOverlays();
+    setupMutationObserver();
+    setupStorageListener();
+}
 
-// Set up MutationObserver to handle dynamically added textareas
-const observer = new MutationObserver(() => createOverlays());
-observer.observe(document.body, { childList: true, subtree: true });
+function setupMutationObserver() {
+    const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                createOverlays();
+            }
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+function setupStorageListener() {
+    chrome.storage.onChanged.addListener(() => {
+        cachedSettings = null;
+    });
+}
 
 function debounce(func, delay) {
     let timeout;
@@ -55,14 +71,15 @@ function createButton(textarea) {
     document.body.appendChild(button);
     updatePosition();
 
-    window.addEventListener('scroll', updatePosition);
-    window.addEventListener('resize', updatePosition);
+    const debouncedUpdate = debounce(updatePosition, 100);
+    window.addEventListener('scroll', debouncedUpdate);
+    window.addEventListener('resize', debouncedUpdate);
 
     // Clean up event listeners when the button is removed
     new MutationObserver(() => {
         if (!document.body.contains(button)) {
-            window.removeEventListener('scroll', updatePosition);
-            window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', debouncedUpdate);
+            window.removeEventListener('resize', debouncedUpdate);
         }
     }).observe(document.body, { childList: true, subtree: true });
 }
@@ -133,9 +150,12 @@ async function streamResponseToTextarea(response, textarea) {
             if (done) break;
 
             const chunk = decoder.decode(value);
-            buffer += processChunk(chunk);
-            textarea.value = buffer;
-            textarea.scrollTop = textarea.scrollHeight;
+            const newContent = processChunk(chunk);
+            if (newContent) {
+                buffer += newContent;
+                textarea.value = buffer;
+                textarea.scrollTop = textarea.scrollHeight;
+            }
         }
     } catch (error) {
         console.error('Error streaming response:', error);
@@ -154,12 +174,15 @@ function processChunk(chunk) {
 
         try {
             const jsonData = JSON.parse(line.replace('data: ', ''));
-            if (!jsonData.choices || !jsonData.choices[0]?.delta?.content) {
-                throw new Error('Invalid response format');
+            // Only append content if it exists, don't throw error if it doesn't
+            const deltaContent = jsonData.choices?.[0]?.delta?.content;
+            if (deltaContent) {
+                content += deltaContent;
             }
-            content += jsonData.choices[0].delta.content;
         } catch (error) {
-            console.error('Error parsing chunk:', error);
+            console.error('Error parsing JSON from chunk:', error);
+            // Continue processing other lines instead of breaking the entire stream
+            continue;
         }
     }
 
@@ -167,10 +190,9 @@ function processChunk(chunk) {
 }
 
 function createOverlays() {
-    const textareas = document.querySelectorAll('textarea');
+    const textareas = document.querySelectorAll('textarea:not([data-has-button])');
 
     textareas.forEach((textarea) => {
-        if (processedTextareas.has(textarea)) return;
         createButton(textarea);
         processedTextareas.add(textarea);
     });
