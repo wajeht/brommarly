@@ -3,10 +3,12 @@ let cachedSettings = null;
 
 main();
 
-function main() {
-    createOverlays();
-    setupMutationObserver();
-    setupStorageListener();
+async function main() {
+    if (await shouldProcessPage()) {
+        createOverlays();
+        setupMutationObserver();
+        setupStorageListener();
+    }
 }
 
 function setupMutationObserver() {
@@ -17,7 +19,23 @@ function setupMutationObserver() {
             }
         }
     });
+
     observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('unload', () => observer.disconnect());
+}
+
+async function shouldProcessPage() {
+    const settings = await getSettings();
+    if (!settings.ignoredUrls) return true;
+
+    const ignoredUrls = settings.ignoredUrls.split('\n')
+        .map(url => url.trim())
+        .filter(Boolean);
+
+    return !ignoredUrls.some(url =>
+        window.location.href.includes(url)
+    );
 }
 
 function setupStorageListener() {
@@ -28,7 +46,7 @@ function setupStorageListener() {
 
 function debounce(func, delay) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), delay);
     };
