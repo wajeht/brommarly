@@ -76,6 +76,9 @@ const main = async () => {
         'package.json', // Exclude package.json
         '.DS_Store', // Exclude macOS .DS_Store files
         '*.log', // Exclude log files
+        'LICENSE', // Exclude LICENSE
+        'README.md', // Exclude README.md
+        '*.zip', // Exclude zip files
       ],
     });
     archive.finalize();
