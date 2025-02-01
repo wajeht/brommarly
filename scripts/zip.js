@@ -64,7 +64,7 @@ const main = async () => {
 
     // Add files to the zip
     archive.pipe(output);
-    archive.directory(extensionDir, false, { ignore: ['node_modules', 'bin', 'scripts'] }); // Exclude folders
+    archive.directory(extensionDir, false, { ignore: ['node_modules', 'bin', 'scripts', 'docs', '.git', 'package-lock.json', 'package.json'] }); // Exclude folders
     archive.finalize();
 
     // Step 5: Push the new tag to GitHub
