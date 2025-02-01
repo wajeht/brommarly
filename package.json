@@ -1,0 +1,22 @@
+{
+  "name": "chad",
+  "version": "1.0.1",
+  "description": "[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/wajeht/bro/blob/main/LICENSE) [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/wajeht/bro)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "zip": "node scripts/zip.js"
+  },
+  "keywords": [
+    "openai",
+    "claude",
+    "ai"
+  ],
+  "author": "wajeth",
+  "license": "MIT",
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  }
+}
