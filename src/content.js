@@ -97,7 +97,10 @@ async function handleButtonClick(textarea, button) {
             return;
         }
 
-        const response = await fetchChatCompletion(settings.apiKey, settings.model, textarea.value);
+        const prompt = preparePrompt(settings.customPrompt, originalText);
+
+        const response = await fetchChatCompletion(settings.apiKey, settings.model, prompt);
+
         await streamResponseToTextarea(response, textarea);
     } catch (error) {
         console.error('Error:', error);
@@ -109,9 +112,17 @@ async function handleButtonClick(textarea, button) {
     }
 }
 
+function preparePrompt(customPrompt, originalText) {
+    if (!customPrompt) {
+        return originalText;
+    }
+
+    return `${customPrompt}\n\n${originalText}`;
+}
+
 async function getSettings() {
     if (cachedSettings) return cachedSettings;
-    cachedSettings = await chrome.storage.sync.get(['apiKey', 'model', 'ignoredUrls']);
+    cachedSettings = await chrome.storage.sync.get(['apiKey', 'model', 'ignoredUrls', 'customPrompt']);
     return cachedSettings;
 }
 

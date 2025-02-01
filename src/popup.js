@@ -1,21 +1,25 @@
-document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.sync.get(['apiKey', 'model', 'ignoredUrls'], function(result) {
-        if (result.apiKey) document.getElementById('apiKey').value = result.apiKey;
-        if (result.model) document.getElementById('model').value = result.model;
-        if (result.ignoredUrls) document.getElementById('ignoredUrls').value = result.ignoredUrls;
+const FIELDS = ['apiKey', 'model', 'ignoredUrls', 'customPrompt'];
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const settings = await chrome.storage.sync.get(FIELDS);
+    FIELDS.forEach(field => {
+        if (settings[field]) {
+            document.getElementById(field).value = settings[field];
+        }
     });
 });
 
-document.getElementById('saveSettings').addEventListener('click', function() {
-    const apiKey = document.getElementById('apiKey').value;
-    const model = document.getElementById('model').value;
-    const ignoredUrls = document.getElementById('ignoredUrls').value;
-
-    chrome.storage.sync.set({
-        apiKey: apiKey,
-        model: model,
-        ignoredUrls: ignoredUrls,
-    }, function() {
-        alert('Settings saved!');
+document.getElementById('saveSettings').addEventListener('click', async () => {
+    const settings = {};
+    FIELDS.forEach(field => {
+        settings[field] = document.getElementById(field).value.trim();
     });
+
+    if (!settings.apiKey || !settings.model) {
+        alert('API Key and Model are required');
+        return;
+    }
+
+    await chrome.storage.sync.set(settings);
+    alert('Settings saved!');
 });
