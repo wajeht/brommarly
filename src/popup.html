@@ -12,6 +12,15 @@
         .form-group {
             margin-bottom: 10px;
             width: 100%;
+
+            label {
+                font-weight: bold;
+
+                .optional {
+                    color: grey;
+                    font-weight: normal;
+                }
+            }
         }
 
         label {
@@ -50,13 +59,12 @@
 
 <body>
     <div class="form-group">
-        <label for="ignoredUrls">Ignored URLS</label>
-        <textarea id="ignoredUrls" rows="10"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label for="customPrompt">Custom Prompt</label>
-        <textarea id="customPrompt" rows="5"></textarea>
+        <label for="model">Model:</label>
+        <select id="model">
+            <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+            <option value="gpt-4">GPT-4</option>
+        </select>
     </div>
 
     <div class="form-group">
@@ -65,12 +73,13 @@
     </div>
 
     <div class="form-group">
-        <label for="model">Model:</label>
-        <select id="model">
-            <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
-            <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-4">GPT-4</option>
-        </select>
+        <label for="customPrompt">Custom Prompt <span class="optional">(optional)</span></label>
+        <textarea id="customPrompt" rows="5"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="ignoredUrls">Ignored URLS <span class="optional">(seperate by new line)</span></label>
+        <textarea id="ignoredUrls" rows="10"></textarea>
     </div>
 
     <button id="saveSettings">Save Settings</button>
