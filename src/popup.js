@@ -23,3 +23,14 @@ document.getElementById('saveSettings').addEventListener('click', async () => {
     await chrome.storage.sync.set(settings);
     alert('Settings saved!');
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const apiKeyToggle = document.getElementById('apiKeyToggle');
+    const apiKeyInput = document.getElementById('apiKey');
+
+    apiKeyToggle.addEventListener('click', function () {
+        const isPassword = apiKeyInput.type === 'password';
+        apiKeyInput.type = isPassword ? 'text' : 'password';
+        this.textContent = isPassword ? '(hide)' : '(show)';
+    });
+});
