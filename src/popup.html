@@ -1,58 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chad</title>
     <style>
         body {
             width: 250px;
             padding: 10px;
+            height: fit-content;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
         }
 
         .form-group {
             margin-bottom: 10px;
-            width: 100%;
-
-            label {
-                font-weight: bold;
-
-                .optional {
-                    color: grey;
-                    font-weight: normal;
-                }
-            }
         }
 
-        label {
+        .form-group label {
             display: block;
+            font-weight: bold;
             margin-bottom: 5px;
         }
 
-        textarea {
-            max-width: 100%;
-            width: 100%;
+        .form-group .optional {
+            color: #777;
+            font-weight: normal;
         }
 
-        input,
-        select {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 5px;
+            padding: 8px;
             margin-bottom: 10px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
         }
 
         button {
-            background: #4285f4;
+            width: 100%;
+            padding: 10px;
+            background-color: #4285f4;
             color: white;
             border: none;
-            padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
-            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background: #3367d6;
+            background-color: #3367d6;
+        }
+
+        button:active {
+            background-color: #2a56c7;
         }
     </style>
 </head>
@@ -74,12 +86,12 @@
 
     <div class="form-group">
         <label for="customPrompt">Custom Prompt <span class="optional">(optional)</span></label>
-        <textarea id="customPrompt" rows="5"></textarea>
+        <textarea id="customPrompt" rows="5" placeholder="Enter your custom prompt"></textarea>
     </div>
 
     <div class="form-group">
-        <label for="ignoredUrls">Ignored URLS <span class="optional">(seperate by new line)</span></label>
-        <textarea id="ignoredUrls" rows="10"></textarea>
+        <label for="ignoredUrls">Ignored URLs <span class="optional">(separate by new line)</span></label>
+        <textarea id="ignoredUrls" rows="10" placeholder="Enter URLs to ignore"></textarea>
     </div>
 
     <button id="saveSettings">Save Settings</button>
