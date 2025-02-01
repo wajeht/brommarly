@@ -4,14 +4,30 @@
   "version": "1.0",
  "description": "A personal AI assistant that seamlessly embeds into every text area",
   "permissions": ["activeTab", "storage"],
+  "icons": {
+    "16": "./assets/chad.png",
+    "32": "./assets/chad.png",
+    "48": "./assets/chad.png",
+    "128": "./assets/chad.png"
+  },
   "action": {
     "default_popup": "./src/popup.html",
-    "default_icon": "./assets/chad.png"
+    "default_icon": {
+      "16": "./assets/chad.png",
+      "32": "./assets/chad.png",
+      "48": "./assets/chad.png",
+      "128": "./assets/chad.png"
+    }
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["./src/content.js"]
     }
-  ]
+  ],
+  "author": "wajeht",
+  "homepage_url": "https://github.com/wajeht/chad",
+  "short_name": "Chad",
+  "offline_enabled": false,
+  "minimum_chrome_version": "88"
 }

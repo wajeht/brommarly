@@ -1,4 +1,3 @@
-const processedTextareas = new WeakSet();
 let cachedSettings = null;
 
 main();
@@ -12,17 +11,46 @@ async function main() {
 }
 
 function setupMutationObserver() {
+    let cleanupTimeout;
+
     const observer = new MutationObserver((mutationsList) => {
-        for (const mutation of mutationsList) {
-            if (mutation.type === 'childList') {
-                createOverlays();
+        clearTimeout(cleanupTimeout);
+        cleanupTimeout = setTimeout(() => {
+            if (!mutationsList.some(m => m.addedNodes.length > 0 || m.removedNodes.length > 0)) {
+                return;
             }
-        }
+
+            const textareas = document.querySelectorAll('textarea:not([data-chad-id])');
+            textareas.forEach(createButton);
+
+            const buttons = document.querySelectorAll('button[data-chad-button]');
+            buttons.forEach(button => {
+                const textareaId = button.getAttribute('data-textarea-id');
+                if (textareaId && !document.querySelector(`textarea[data-chad-id="${textareaId}"]`)) {
+                    button.remove();
+                }
+            });
+        }, 200);
     });
 
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: false,
+        characterData: false
+    });
 
-    window.addEventListener('unload', () => observer.disconnect());
+    window.addEventListener('unload', () => {
+        clearTimeout(cleanupTimeout);
+        observer.disconnect();
+        document.querySelectorAll('button[data-chad-button]').forEach(b => b.remove());
+    });
+
+    window.addEventListener('popstate', () => {
+        document.querySelectorAll('button[data-chad-button]').forEach(b => b.remove());
+    });
+
+    return observer;
 }
 
 async function shouldProcessPage() {
@@ -33,9 +61,7 @@ async function shouldProcessPage() {
         .map(url => url.trim())
         .filter(Boolean);
 
-    return !ignoredUrls.some(url =>
-        window.location.href.includes(url)
-    );
+    return !ignoredUrls.some(url => window.location.href.includes(url));
 }
 
 function setupStorageListener() {
@@ -52,13 +78,16 @@ function debounce(func, delay) {
     };
 }
 
-// Create a button for a textarea
 function createButton(textarea) {
-    if (textarea.dataset.hasButton) return; // Skip if button already exists
-    textarea.dataset.hasButton = true;
+    if (textarea.getAttribute('data-chad-id')) return;
+
+    const textareaId = `chad-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    textarea.setAttribute('data-chad-id', textareaId);
 
     const button = document.createElement('button');
     button.textContent = '🗿';
+    button.setAttribute('data-chad-button', 'true');
+    button.setAttribute('data-textarea-id', textareaId);
     button.style.cssText = `
         position: absolute;
         background: white;
@@ -76,8 +105,11 @@ function createButton(textarea) {
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     `;
 
-    // Position the button relative to the textarea
     const updatePosition = debounce(() => {
+        if (!document.body.contains(textarea)) {
+            button.remove();
+            return;
+        }
         const rect = textarea.getBoundingClientRect();
         button.style.top = `${rect.bottom - 30 + window.scrollY}px`;
         button.style.left = `${rect.right - 30 + window.scrollX}px`;
@@ -85,19 +117,18 @@ function createButton(textarea) {
 
     button.addEventListener('click', () => handleButtonClick(textarea, button));
 
-    // Append button to the document and update its position
     document.body.appendChild(button);
     updatePosition();
 
-    const debouncedUpdate = debounce(updatePosition, 100);
-    window.addEventListener('scroll', debouncedUpdate);
-    window.addEventListener('resize', debouncedUpdate);
+    window.addEventListener('scroll', updatePosition);
+    window.addEventListener('resize', updatePosition);
 
-    // Clean up event listeners when the button is removed
-    new MutationObserver(() => {
-        if (!document.body.contains(button)) {
-            window.removeEventListener('scroll', debouncedUpdate);
-            window.removeEventListener('resize', debouncedUpdate);
+    new MutationObserver((mutations, observer) => {
+        if (!document.body.contains(textarea)) {
+            button.remove();
+            observer.disconnect();
+            window.removeEventListener('scroll', updatePosition);
+            window.removeEventListener('resize', updatePosition);
         }
     }).observe(document.body, { childList: true, subtree: true });
 }
@@ -219,10 +250,12 @@ function processChunk(chunk) {
 }
 
 function createOverlays() {
-    const textareas = document.querySelectorAll('textarea:not([data-has-button])');
-
-    textareas.forEach((textarea) => {
-        createButton(textarea);
-        processedTextareas.add(textarea);
+    document.querySelectorAll('button[data-chad-button]').forEach(button => {
+        const textareaId = button.getAttribute('data-textarea-id');
+        if (textareaId && !document.querySelector(`textarea[data-chad-id="${textareaId}"]`)) {
+            button.remove();
+        }
     });
+
+    document.querySelectorAll('textarea').forEach(createButton);
 }
