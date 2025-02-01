@@ -29,6 +29,15 @@ const checkGitStatus = async () => {
   }
 };
 
+// Function to update the version in manifest.json
+const updateManifestVersion = (newVersion) => {
+  const manifestPath = path.join(__dirname, '../manifest.json');
+  const manifest = require(manifestPath);
+  manifest.version = newVersion; // Update the version
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2)); // Write back to manifest.json
+  console.log(`Updated manifest.json version to: ${newVersion}`);
+};
+
 // Main function
 const main = async () => {
   try {
@@ -41,11 +50,14 @@ const main = async () => {
     const newVersion = versionOutput.trim().replace('v', ''); // Extract the new version (e.g., "v1.0.1" -> "1.0.1")
     console.log(`New version: ${newVersion}`);
 
-    // Step 3: Ensure /bin folder exists
+    // Step 3: Update the version in manifest.json
+    updateManifestVersion(newVersion);
+
+    // Step 4: Ensure /bin folder exists
     console.log('Creating /bin folder...');
     await runCommand(`mkdir -p ${path.join(__dirname, '../bin')}`);
 
-    // Step 4: Zip the extension
+    // Step 5: Zip the extension
     console.log('Zipping extension...');
     const extensionDir = path.join(__dirname, '..'); // Root of your project
     const outputZip = path.join(__dirname, '../bin', `extension-v${newVersion}.zip`); // Output zip file with new version
@@ -83,7 +95,7 @@ const main = async () => {
     });
     archive.finalize();
 
-    // Step 5: Push the new tag to GitHub
+    // Step 6: Push the new tag to GitHub
     console.log('Pushing new tag to GitHub...');
     await runCommand('git push main main --tags'); // Use "main" as the remote name
     console.log('Tag pushed to GitHub successfully!');
