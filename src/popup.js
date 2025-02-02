@@ -99,10 +99,24 @@ async function displayDomainSelectors() {
             selectorText.className = 'selector-text';
             selectorText.textContent = selectorData.selector;
 
+            const urlContainer = document.createElement('div');
+            urlContainer.className = 'url-container';
+
             const urlText = document.createElement('div');
             urlText.className = 'url-text';
             urlText.textContent = simplifyUrl(selectorData.url);
             urlText.title = selectorData.url;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-selector';
+            deleteButton.textContent = '×';
+            deleteButton.onclick = async () => {
+                await deleteSelector(domain, index);
+                await displayDomainSelectors();
+            };
+
+            urlContainer.appendChild(urlText);
+            urlContainer.appendChild(deleteButton);
 
             const promptInput = document.createElement('textarea');
             promptInput.className = 'selector-prompt';
@@ -115,19 +129,10 @@ async function displayDomainSelectors() {
             });
 
             selectorInfo.appendChild(selectorText);
-            selectorInfo.appendChild(urlText);
+            selectorInfo.appendChild(urlContainer);
             selectorInfo.appendChild(promptInput);
 
-            const deleteButton = document.createElement('button');
-            deleteButton.className = 'delete-selector';
-            deleteButton.textContent = '×';
-            deleteButton.onclick = async () => {
-                await deleteSelector(domain, index);
-                await displayDomainSelectors();
-            };
-
             selectorItem.appendChild(selectorInfo);
-            selectorItem.appendChild(deleteButton);
             domainGroup.appendChild(selectorItem);
         });
 
