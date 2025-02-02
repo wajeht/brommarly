@@ -65,7 +65,7 @@ $ npm run release <version-type>
 Where `<version-type>` can be `major`, `minor`, or `patch`.
 
 ```bash
-$ npm run release major
+$ npm run release major # after the release update the CHANGELOG.md file
 $ git add .
 $ git commit -m "Release v2.1.3"
 $ git push
