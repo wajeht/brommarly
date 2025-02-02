@@ -1,6 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
@@ -10,12 +14,12 @@ const changelogPath = path.join(__dirname, '../CHANGELOG.md');
 function resetVersion() {
   try {
     // Reset package.json version
-    const packageJson = require(packageJsonPath);
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     packageJson.version = '0.0.0';
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     // Reset manifest.json version
-    const manifestJson = require(manifestJsonPath);
+    const manifestJson = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
     manifestJson.version = '0.0.0';
     fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
 

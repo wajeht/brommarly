@@ -1,6 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const archiver = require('archiver');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import archiver from 'archiver';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
@@ -8,10 +12,10 @@ const binFolderPath = path.join(__dirname, '../bin');
 const changelogPath = path.join(__dirname, '../CHANGELOG.md');
 const extensionDir = path.join(__dirname, '..');
 
-function incrementVersion(versionType) {
+async function incrementVersion(versionType) {
   try {
     // Read and update package.json version
-    const packageJson = require(packageJsonPath);
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const currentVersion = packageJson.version;
     const newVersion = incrementVersionPart(currentVersion, versionType);
 
@@ -19,7 +23,7 @@ function incrementVersion(versionType) {
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     // Read and update manifest.json version
-    const manifestJson = require(manifestJsonPath);
+    const manifestJson = JSON.parse(fs.readFileSync(manifestJsonPath, 'utf8'));
     manifestJson.version = newVersion;
     fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
 
@@ -124,7 +128,7 @@ async function main() {
       throw new Error('Invalid version type. Use major, minor, or patch.');
     }
 
-    const newVersion = incrementVersion(versionType);
+    const newVersion = await incrementVersion(versionType);
     createBinFolder();
     const zipFilePath = await zipExtension(newVersion); // Wait for the zip process to complete
     generateChangelog(newVersion, zipFilePath);
