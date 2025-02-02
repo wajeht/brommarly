@@ -58,25 +58,23 @@ function zipExtension(newVersion) {
 
       archive.pipe(output);
 
-      archive.glob([
-        './assets/**/*',
-        './src/**/*',
-        './manifest.json',
-      ], { cwd: extensionDir });
+      archive.directory(path.join(extensionDir, 'assets'), 'assets');
+      archive.directory(path.join(extensionDir, 'src'), 'src');
+      archive.file(path.join(extensionDir, 'manifest.json'), { name: 'manifest.json' });
 
       output.on('close', () => {
         console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
         console.log(`Zip file saved to: ${outputZip}`);
-        resolve(outputZip); // Resolve the promise with the path to the zipped file
+        resolve(outputZip);
       });
 
       archive.on('error', (err) => {
-        reject(err); // Reject the promise if there's an error
+        reject(err);
       });
 
       archive.finalize();
     } catch (error) {
-      reject(error); // Reject the promise if there's an error
+      reject(error);
     }
   });
 }
