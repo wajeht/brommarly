@@ -4,28 +4,37 @@ let highlightedElement = null;
 
 function setupMutationObserver() {
     let cleanupTimeout;
+    let isProcessing = false;
 
     const observer = new MutationObserver(async (mutationsList) => {
+        // Skip if we're already processing
+        if (isProcessing) return;
+
+        // Check if mutations are relevant
+        const hasRelevantChanges = mutationsList.some(mutation => {
+            // Skip style changes and chad-button mutations
+            if (mutation.target.hasAttribute('data-chad-button')) return false;
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') return false;
+            return true;
+        });
+
+        if (!hasRelevantChanges) return;
+
         clearTimeout(cleanupTimeout);
         cleanupTimeout = setTimeout(async () => {
-            const settings = await getSettings();
-
-            // Remove all buttons if they're not manually added
-            document.querySelectorAll('[data-chad-id]').forEach(element => {
-                if (element.getAttribute('data-chad-manual') !== 'true') {
-                    const buttonId = element.getAttribute('data-chad-id');
-                    const button = document.querySelector(`button[data-textarea-id="${buttonId}"]`);
-                    if (button) button.remove();
-                    element.removeAttribute('data-chad-id');
-                }
-            });
-        }, 200);
+            isProcessing = true;
+            try {
+                await restoreSavedSelectors();
+            } finally {
+                isProcessing = false;
+            }
+        }, 500); // Increased debounce time
     });
 
     observer.observe(document.body, {
         childList: true,
         subtree: true,
-        attributes: false,
+        attributes: false, // Don't observe attribute changes
         characterData: false
     });
 
@@ -119,10 +128,17 @@ async function handleButtonClick(element, button, originalText) {
             return;
         }
 
-        const prompt = preparePrompt(settings.customPrompt, originalText);
+        // Get the selector-specific prompt if it exists
+        const domain = window.location.hostname;
+        const selector = generateUniqueSelector(element);
+        const selectorData = settings.domainSelectors[domain]?.find(
+            item => item.selector === selector
+        );
+
+        const customPrompt = selectorData?.customPrompt || '';
+        const prompt = preparePrompt(customPrompt, originalText);
 
         const response = await fetchChatCompletion(settings.apiKey, settings.model, prompt);
-
         await streamResponseToTextarea(response, element);
     } catch (error) {
         console.error('Error:', error);
@@ -153,7 +169,7 @@ async function getSettings() {
         domainSelectors: {}
     };
 
-    cachedSettings = await chrome.storage.sync.get(['apiKey', 'model', 'customPrompt', 'domainSelectors']);
+    cachedSettings = await chrome.storage.sync.get(['apiKey', 'model', 'domainSelectors']);
     cachedSettings = { ...defaults, ...cachedSettings };
 
     return cachedSettings;
@@ -449,37 +465,34 @@ async function restoreSavedSelectors() {
     try {
         const settings = await getSettings();
         const domain = window.location.hostname;
-        const currentUrl = window.location.href;
 
-        if (settings.domainSelectors?.[domain]) {
-            const validSelectors = [];
+        // Skip if no selectors for this domain
+        if (!settings.domainSelectors?.[domain]) {
+            return;
+        }
 
-            for (const selectorData of settings.domainSelectors[domain]) {
-                try {
-                    // Handle both old format (string) and new format (object)
-                    const selector = typeof selectorData === 'string' ? selectorData : selectorData.selector;
-                    const element = document.querySelector(selector);
-                    if (element) {
-                        createButton(element);
-                        validSelectors.push({
-                            selector: selector,
-                            url: typeof selectorData === 'string' ? currentUrl : selectorData.url
-                        });
+        // Get all existing chad buttons
+        const existingButtons = document.querySelectorAll('button[data-chad-button]');
+        const existingButtonIds = new Set(
+            Array.from(existingButtons).map(button =>
+                button.getAttribute('data-textarea-id')
+            )
+        );
+
+        for (const selectorData of settings.domainSelectors[domain]) {
+            try {
+                const selector = typeof selectorData === 'string' ? selectorData : selectorData.selector;
+                const element = document.querySelector(selector);
+
+                if (element) {
+                    const existingId = element.getAttribute('data-chad-id');
+                    // Only create button if it doesn't already exist
+                    if (!existingId || !existingButtonIds.has(existingId)) {
+                        await createButton(element);
                     }
-                } catch (error) {
-                    console.debug('Invalid selector, will be removed:', selectorData);
-                    continue;
                 }
-            }
-
-            // Update storage with valid selectors
-            if (validSelectors.length !== settings.domainSelectors[domain].length) {
-                settings.domainSelectors[domain] = validSelectors;
-                if (validSelectors.length === 0) {
-                    delete settings.domainSelectors[domain];
-                }
-                await chrome.storage.sync.set({ domainSelectors: settings.domainSelectors });
-                cachedSettings = null;
+            } catch (error) {
+                console.debug('Invalid selector:', selectorData);
             }
         }
     } catch (error) {
@@ -543,9 +556,9 @@ async function main() {
 }
 
 async function initializePage() {
-    // Only restore manual selectors
     await restoreSavedSelectors();
     setupStorageListener();
+    setupMutationObserver();
 }
 
 main();

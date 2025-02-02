@@ -1,4 +1,4 @@
-const FIELDS = ['apiKey', 'model', 'customPrompt'];
+const FIELDS = ['apiKey', 'model'];
 
 document.addEventListener('DOMContentLoaded', async () => {
     const settings = await chrome.storage.sync.get(FIELDS);
@@ -97,16 +97,26 @@ async function displayDomainSelectors() {
 
             const selectorText = document.createElement('div');
             selectorText.className = 'selector-text';
-            selectorText.textContent = typeof selectorData === 'string' ? selectorData : selectorData.selector;
+            selectorText.textContent = selectorData.selector;
 
             const urlText = document.createElement('div');
             urlText.className = 'url-text';
-            const url = typeof selectorData === 'string' ? '' : selectorData.url;
-            urlText.textContent = simplifyUrl(url);
-            urlText.title = url; // Show full URL on hover
+            urlText.textContent = simplifyUrl(selectorData.url);
+            urlText.title = selectorData.url;
+
+            const promptInput = document.createElement('textarea');
+            promptInput.className = 'selector-prompt';
+            promptInput.placeholder = 'Custom prompt for this element (optional)';
+            promptInput.value = selectorData.customPrompt || '';
+            promptInput.addEventListener('change', async () => {
+                const { domainSelectors } = await chrome.storage.sync.get('domainSelectors');
+                domainSelectors[domain][index].customPrompt = promptInput.value;
+                await chrome.storage.sync.set({ domainSelectors });
+            });
 
             selectorInfo.appendChild(selectorText);
             selectorInfo.appendChild(urlText);
+            selectorInfo.appendChild(promptInput);
 
             const deleteButton = document.createElement('button');
             deleteButton.className = 'delete-selector';

@@ -165,6 +165,22 @@
             border-radius: 4px;
             margin-bottom: 6px;
         }
+
+        .selector-prompt {
+            width: 100%;
+            margin-top: 5px;
+            padding: 4px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            resize: vertical;
+            min-height: 50px;
+        }
+
+        .selector-item {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -181,11 +197,6 @@
     <div class="form-group">
         <label for="apiKey">API Key <span role="button" id="apiKeyToggle" class="optional" style="cursor: pointer;">(show)</span></label>
         <input type="password" id="apiKey" placeholder="Enter your API key">
-    </div>
-
-    <div class="form-group">
-        <label for="customPrompt">Custom Prompt <span class="optional">(optional)</span></label>
-        <textarea id="customPrompt" placeholder="Enter your custom prompt"></textarea>
     </div>
 
     <div class="form-group">
