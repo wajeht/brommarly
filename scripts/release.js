@@ -8,12 +8,12 @@ const binFolderPath = path.join(__dirname, '../bin');
 const changelogPath = path.join(__dirname, '../CHANGELOG.md');
 const extensionDir = path.join(__dirname, '..');
 
-function incrementVersion() {
+function incrementVersion(versionType) {
   try {
     // Read and update package.json version
     const packageJson = require(packageJsonPath);
     const currentVersion = packageJson.version;
-    const newVersion = incrementPatchVersion(currentVersion);
+    const newVersion = incrementVersionPart(currentVersion, versionType);
 
     packageJson.version = newVersion;
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
@@ -31,9 +31,26 @@ function incrementVersion() {
   }
 }
 
-function incrementPatchVersion(currentVersion) {
+function incrementVersionPart(currentVersion, versionType) {
   const versionParts = currentVersion.split('.').map(Number);
-  versionParts[2] += 1;  // Increment patch version
+
+  switch (versionType) {
+    case 'major':
+      versionParts[0] += 1;
+      versionParts[1] = 0;
+      versionParts[2] = 0;
+      break;
+    case 'minor':
+      versionParts[1] += 1;
+      versionParts[2] = 0;
+      break;
+    case 'patch':
+      versionParts[2] += 1;
+      break;
+    default:
+      throw new Error('Invalid version type. Use major, minor, or patch.');
+  }
+
   return versionParts.join('.');
 }
 
@@ -103,7 +120,12 @@ function generateChangelog(newVersion, zipFilePath) {
 
 async function main() {
   try {
-    const newVersion = incrementVersion();
+    const versionType = process.argv[2];
+    if (!['major', 'minor', 'patch'].includes(versionType)) {
+      throw new Error('Invalid version type. Use major, minor, or patch.');
+    }
+
+    const newVersion = incrementVersion(versionType);
     createBinFolder();
     const zipFilePath = await zipExtension(newVersion); // Wait for the zip process to complete
     generateChangelog(newVersion, zipFilePath);
