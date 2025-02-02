@@ -69,7 +69,7 @@ function createBinFolder() {
 function zipExtension(newVersion) {
   return new Promise((resolve, reject) => {
     try {
-      const outputZip = path.join(binFolderPath, `extension-v${newVersion}.zip`);
+      const outputZip = path.join(binFolderPath, `chad-v${newVersion}.zip`);
       const output = fs.createWriteStream(outputZip);
       const archive = archiver('zip', { zlib: { level: 9 } });
 
