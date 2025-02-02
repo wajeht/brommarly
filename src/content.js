@@ -1,6 +1,7 @@
 let cachedSettings = null;
 let selectorMode = false;
 let highlightedElement = null;
+const inputTypes = ['text', 'textarea', 'email', 'password', 'number', 'tel', 'url', 'search', 'color', 'date', 'time', 'datetime-local', 'week', 'month', 'datetime'];
 
 function setupMutationObserver() {
     let cleanupTimeout;
@@ -302,7 +303,14 @@ function handleMouseOver(e) {
     }
 
     highlightedElement = e.target;
-    highlightedElement.style.outline = '2px solid #4285f4';
+    const tagName = e.target.tagName.toLowerCase();
+    const isInput = tagName === 'input';
+    const isValidType = isInput ? inputTypes.includes(e.target.type) : inputTypes.includes(tagName);
+    const hasBubble = highlightedElement.hasAttribute('data-chad-id');
+
+    const isSelectable = isValidType && !hasBubble;
+    highlightedElement.style.outline = isSelectable ? '2px solid #4285f4' : '2px solid #ff0000';
+    document.body.style.cursor = isSelectable ? 'crosshair' : 'not-allowed';
 }
 
 function handleMouseOut(e) {
@@ -314,6 +322,17 @@ async function handleSelectorClick(e) {
     if (!selectorMode) return;
     e.preventDefault();
     e.stopPropagation();
+
+    const tagName = e.target.tagName.toLowerCase();
+    const isInput = tagName === 'input';
+    const isValidType = isInput ? inputTypes.includes(e.target.type) : inputTypes.includes(tagName);
+    const hasBubble = e.target.hasAttribute('data-chad-id');
+
+    if (!isValidType || hasBubble) {
+        alert('Invalid input type or already has bubble');
+        disableSelectorMode();
+        return; // Early return if not valid or already has bubble
+    }
 
     const element = e.target;
     await saveDomainSelector(element);
