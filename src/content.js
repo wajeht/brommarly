@@ -1,15 +1,5 @@
 let cachedSettings = null;
 
-main();
-
-async function main() {
-    if (await shouldProcessPage()) {
-        createOverlays();
-        setupMutationObserver();
-        setupStorageListener();
-    }
-}
-
 function setupMutationObserver() {
     let cleanupTimeout;
 
@@ -259,3 +249,14 @@ function createOverlays() {
 
     document.querySelectorAll('textarea').forEach(createButton);
 }
+
+
+async function main() {
+    if (await shouldProcessPage()) {
+        createOverlays();
+        setupMutationObserver();
+        setupStorageListener();
+    }
+}
+
+main();

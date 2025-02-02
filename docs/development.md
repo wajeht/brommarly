@@ -48,3 +48,18 @@ If you encounter any issues:
   nvm install v22.3.0
   nvm use v22.3.0
   ```
+
+## Release
+
+To release a new version, run:
+```bash
+$ npm run release <version-type>
+```
+
+Where `<version-type>` can be `major`, `minor`, or `patch`.
+
+```bash
+$ git add .
+$ git commit -m "Release v2.1.3"
+$ git push
+```
