@@ -123,7 +123,7 @@ function generateChangelog(newVersion, versionType, changes) {
 
     // Add changes to the changelog
     changelogEntry += changes.map(change => `- ${change}\n`).join('');
-    changelogEntry += `\n[Download v${newVersion}](https://github.com/wajeht/chad/raw/refs/heads/main/bin/${newVersion}.zip)\n\n`;
+    changelogEntry += `\n[Download v${newVersion}](https://github.com/wajeht/chad/raw/refs/heads/main/bin/chad-v${newVersion}.zip)\n\n`;
 
     // Read existing changelog
     let existingChangelog = fs.readFileSync(changelogPath, 'utf8');
