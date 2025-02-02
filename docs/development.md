@@ -37,7 +37,7 @@
    npm install
    ```
 
-## Troubleshooting
+### Troubleshooting
 
 If you encounter any issues:
 - Make sure your terminal is restarted after installing nvm
@@ -52,7 +52,7 @@ If you encounter any issues:
 ## Release
 
 
-To clean all the files in the `bin` folder, reset version in `package.json` and `manifest.json`, run:
+To clean all the files in the `bin` folder, delete `CHANGELOG.md`, reset version in `package.json` and `manifest.json`, run:
 ```bash
 $ npm run clean
 ```
@@ -65,6 +65,7 @@ $ npm run release <version-type>
 Where `<version-type>` can be `major`, `minor`, or `patch`.
 
 ```bash
+$ npm run release major
 $ git add .
 $ git commit -m "Release v2.1.3"
 $ git push
