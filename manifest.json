@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Chad",
-  "version": "1.0",
- "description": "A personal AI assistant that seamlessly embeds into every text area",
-  "permissions": ["activeTab", "storage"],
+  "version": "0.0.1",
+  "description": "A personal AI assistant that seamlessly embeds into every text area",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
   "icons": {
     "16": "./assets/chad.png",
     "32": "./assets/chad.png",
@@ -21,8 +24,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["./src/content.js"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "./src/content.js"
+      ]
     }
   ],
   "author": "wajeht",

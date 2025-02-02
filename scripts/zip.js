@@ -1,63 +1,47 @@
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
-const { exec } = require('child_process');
 
-// Function to run shell commands
-const runCommand = (command) => {
-  return new Promise((resolve, reject) => {
-    exec(command, (err, stdout, stderr) => {
-      if (err) {
-        reject(stderr);
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-};
+// Function to increment the version in package.json and manifest.json
+const incrementVersion = () => {
+  const packageJsonPath = path.join(__dirname, '../package.json');
+  const manifestJsonPath = path.join(__dirname, '../manifest.json');
 
-// Function to check if Git working directory is clean
-const checkGitStatus = async () => {
-  try {
-    const status = await runCommand('git status --porcelain');
-    if (status.trim() !== '') {
-      throw new Error('Git working directory is not clean. Commit or stash your changes before running this script.');
-    }
-  } catch (error) {
-    console.error('Error checking Git status:', error.message);
-    process.exit(1);
-  }
-};
+  // Read package.json
+  const packageJson = require(packageJsonPath);
+  const currentVersion = packageJson.version;
 
-// Function to update the version in manifest.json
-const updateManifestVersion = (newVersion) => {
-  const manifestPath = path.join(__dirname, '../manifest.json');
-  const manifest = require(manifestPath);
-  manifest.version = newVersion; // Update the version
-  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2)); // Write back to manifest.json
-  console.log(`Updated manifest.json version to: ${newVersion}`);
+  // Increment the version (e.g., 1.0.0 -> 1.0.1)
+  const versionParts = currentVersion.split('.').map(Number);
+  versionParts[2] += 1; // Increment patch version
+  const newVersion = versionParts.join('.');
+
+  // Update package.json
+  packageJson.version = newVersion;
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+  // Update manifest.json
+  const manifestJson = require(manifestJsonPath);
+  manifestJson.version = newVersion;
+  fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
+
+  console.log(`Version incremented to: ${newVersion}`);
+  return newVersion;
 };
 
 // Main function
 const main = async () => {
   try {
-    // Step 1: Check if Git working directory is clean
-    await checkGitStatus();
+    // Step 1: Increment the version in package.json and manifest.json
+    const newVersion = incrementVersion();
 
-    // Step 2: Increment the version and create a Git tag
-    console.log('Incrementing version and creating Git tag...');
-    const versionOutput = await runCommand('npm version patch'); // Use 'patch', 'minor', or 'major' as needed
-    const newVersion = versionOutput.trim().replace('v', ''); // Extract the new version (e.g., "v1.0.1" -> "1.0.1")
-    console.log(`New version: ${newVersion}`);
-
-    // Step 3: Update the version in manifest.json
-    updateManifestVersion(newVersion);
-
-    // Step 4: Ensure /bin folder exists
+    // Step 2: Ensure /bin folder exists
     console.log('Creating /bin folder...');
-    await runCommand(`mkdir -p ${path.join(__dirname, '../bin')}`);
+    if (!fs.existsSync(path.join(__dirname, '../bin'))) {
+      fs.mkdirSync(path.join(__dirname, '../bin'));
+    }
 
-    // Step 5: Zip the extension
+    // Step 3: Zip the extension
     console.log('Zipping extension...');
     const extensionDir = path.join(__dirname, '..'); // Root of your project
     const outputZip = path.join(__dirname, '../bin', `extension-v${newVersion}.zip`); // Output zip file with new version
@@ -94,12 +78,6 @@ const main = async () => {
       ],
     });
     archive.finalize();
-
-    // Step 6: Push the new tag to GitHub
-    console.log('Pushing new tag to GitHub...');
-    await runCommand('git push main main --tags'); // Use "main" as the remote name
-    console.log('Tag pushed to GitHub successfully!');
-    process.exit(0);
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);
