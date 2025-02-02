@@ -51,6 +51,9 @@ document.getElementById('toggleSelector').addEventListener('click', async () => 
     if (button.textContent === 'Enable Element Selector') {
         button.textContent = 'Disable Element Selector';
         await chrome.tabs.sendMessage(tab.id, { action: 'enableSelector' });
+
+        await chrome.tabs.update(tab.id, { active: true });
+        window.close();
     } else {
         button.textContent = 'Enable Element Selector';
         await chrome.tabs.sendMessage(tab.id, { action: 'disableSelector' });
