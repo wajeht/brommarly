@@ -111,7 +111,7 @@ function generateChangelog(newVersion, versionType, changes) {
     }
 
     // Generate changelog entry based on version type
-    let changelogEntry = `## [${newVersion}](bin/chad-v${newVersion}.zip) - ${date}\n`;
+    let changelogEntry = `## ${newVersion} - ${date}\n`;
 
     if (versionType === 'patch') {
       changelogEntry += `### Patch Changes\n`;
@@ -147,12 +147,11 @@ function generateChangelog(newVersion, versionType, changes) {
 
 async function main() {
   try {
-    const versionType = process.argv[2];
+    const versionType = process.argv[2] || 'patch';
     if (!['major', 'minor', 'patch'].includes(versionType)) {
       throw new Error('Invalid version type. Use major, minor, or patch.');
     }
 
-    // Example changes for the changelog (you can fetch these dynamically if needed)
     const changes = [
       'docs: update types definition',
       'fix: return on production env',
