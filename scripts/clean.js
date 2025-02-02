@@ -2,12 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Paths to package.json and manifest.json
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
 const binFolderPath = path.join(__dirname, '../bin');
 
-// Function to reset version in package.json and manifest.json
 const resetVersion = () => {
   try {
     // Reset package.json version
@@ -26,7 +24,6 @@ const resetVersion = () => {
   }
 };
 
-// Function to delete all local and remote git tags from all branches
 const deleteGitTags = () => {
   try {
     // Delete local tags
@@ -55,10 +52,6 @@ const deleteGitTags = () => {
   }
 };
 
-
-
-
-// Function to delete all contents inside bin folder
 const cleanBinFolder = () => {
   try {
     if (fs.existsSync(binFolderPath)) {
@@ -71,7 +64,6 @@ const cleanBinFolder = () => {
   }
 };
 
-// Main function
 const main = () => {
   resetVersion();
   deleteGitTags();

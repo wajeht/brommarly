@@ -2,50 +2,56 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-// Function to increment the version in package.json and manifest.json
+const packageJsonPath = path.join(__dirname, '../package.json');
+const manifestJsonPath = path.join(__dirname, '../manifest.json');
+const binFolderPath = path.join(__dirname, '../bin');
+const extensionDir = path.join(__dirname, '..');
+
 const incrementVersion = () => {
-  const packageJsonPath = path.join(__dirname, '../package.json');
-  const manifestJsonPath = path.join(__dirname, '../manifest.json');
+  try {
+    // Read package.json
+    const packageJson = require(packageJsonPath);
+    const currentVersion = packageJson.version;
 
-  // Read package.json
-  const packageJson = require(packageJsonPath);
-  const currentVersion = packageJson.version;
+    // Increment the version (e.g., 1.0.0 -> 1.0.1)
+    const versionParts = currentVersion.split('.').map(Number);
+    versionParts[2] += 1; // Increment patch version
+    const newVersion = versionParts.join('.');
 
-  // Increment the version (e.g., 1.0.0 -> 1.0.1)
-  const versionParts = currentVersion.split('.').map(Number);
-  versionParts[2] += 1; // Increment patch version
-  const newVersion = versionParts.join('.');
+    // Update package.json
+    packageJson.version = newVersion;
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-  // Update package.json
-  packageJson.version = newVersion;
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    // Update manifest.json
+    const manifestJson = require(manifestJsonPath);
+    manifestJson.version = newVersion;
+    fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
 
-  // Update manifest.json
-  const manifestJson = require(manifestJsonPath);
-  manifestJson.version = newVersion;
-  fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
-
-  console.log(`Version incremented to: ${newVersion}`);
-  return newVersion;
+    console.log(`Version incremented to: ${newVersion}`);
+    return newVersion;
+  } catch (error) {
+    console.error('Error incrementing version:', error);
+    throw error;
+  }
 };
 
-// Main function
-const main = async () => {
+const createBinFolder = () => {
   try {
-    // Step 1: Increment the version in package.json and manifest.json
-    const newVersion = incrementVersion();
-
-    // Step 2: Ensure /bin folder exists
-    console.log('Creating /bin folder...');
-    if (!fs.existsSync(path.join(__dirname, '../bin'))) {
-      fs.mkdirSync(path.join(__dirname, '../bin'));
+    if (!fs.existsSync(binFolderPath)) {
+      console.log('Creating /bin folder...');
+      fs.mkdirSync(binFolderPath);
     }
+  } catch (error) {
+    console.error('Error creating /bin folder:', error);
+    throw error;
+  }
+};
 
-    // Step 3: Zip the extension
+const zipExtension = (newVersion) => {
+  try {
     console.log('Zipping extension...');
-    const extensionDir = path.join(__dirname, '..'); // Root of your project
-    const outputZip = path.join(__dirname, '../bin', `extension-v${newVersion}.zip`); // Output zip file with new version
 
+    const outputZip = path.join(binFolderPath, `extension-v${newVersion}.zip`);
     const output = fs.createWriteStream(outputZip);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -60,29 +66,32 @@ const main = async () => {
 
     // Add files to the zip (exclude unnecessary files/folders)
     archive.pipe(output);
-    archive.glob('**/*', {
-      cwd: extensionDir, // Current working directory
-      ignore: [
-        'node_modules/**', // Exclude node_modules
-        'bin/**', // Exclude bin folder
-        'scripts/**', // Exclude scripts folder
-        'docs/**', // Exclude docs folder
-        '.git/**', // Exclude .git folder
-        'package-lock.json', // Exclude package-lock.json
-        'package.json', // Exclude package.json
-        '.DS_Store', // Exclude macOS .DS_Store files
-        '*.log', // Exclude log files
-        'LICENSE', // Exclude LICENSE
-        'README.md', // Exclude README.md
-        '*.zip', // Exclude zip files
-      ],
-    });
+
+    archive.glob([
+      'assets/**/*',     // Include all files inside assets folder
+      'src/**/*',         // Include all files inside src folder
+      'manifest.json',    // Include manifest.json file
+    ], { cwd: extensionDir });  // Working directory for the glob patterns
+
     archive.finalize();
+  } catch (error) {
+    console.error('Error zipping extension:', error);
+    throw error;
+  }
+};
+
+const main = async () => {
+  try {
+    const newVersion = incrementVersion();
+
+    createBinFolder();
+
+    zipExtension(newVersion);
+    process.exit(0);
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);
   }
 };
 
-// Run the script
 main();
