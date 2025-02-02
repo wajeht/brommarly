@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Chad",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "A personal AI assistant that seamlessly embeds into every text area",
   "permissions": [
     "activeTab",

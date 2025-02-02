@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
+const compressing = require('compressing');
 
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
@@ -66,34 +66,33 @@ function createBinFolder() {
   }
 }
 
-function zipExtension(newVersion) {
-  return new Promise((resolve, reject) => {
-    try {
-      const outputZip = path.join(binFolderPath, `chad-v${newVersion}.zip`);
-      const output = fs.createWriteStream(outputZip);
-      const archive = archiver('zip', { zlib: { level: 9 } });
+async function zipExtension(newVersion) {
+  try {
+    const outputZip = path.join(binFolderPath, `chad-v${newVersion}.zip`);
+    const zipStream = new compressing.zip.Stream();
 
-      archive.pipe(output);
+    // Add directories and files to the zip stream
+    zipStream.addEntry(path.join(extensionDir, 'assets'), { relativePath: 'assets' });
+    zipStream.addEntry(path.join(extensionDir, 'src'), { relativePath: 'src' });
+    zipStream.addEntry(path.join(extensionDir, 'manifest.json'), { relativePath: 'manifest.json' });
 
-      archive.directory(path.join(extensionDir, 'assets'), 'assets');
-      archive.directory(path.join(extensionDir, 'src'), 'src');
-      archive.file(path.join(extensionDir, 'manifest.json'), { name: 'manifest.json' });
+    // Write the zip stream to a file
+    const destStream = fs.createWriteStream(outputZip);
+    zipStream.pipe(destStream);
 
-      output.on('close', () => {
-        console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
-        console.log(`Zip file saved to: ${outputZip}`);
+    return new Promise((resolve, reject) => {
+      destStream.on('close', () => {
+        console.log(`Extension zipped successfully: ${outputZip}`);
         resolve(outputZip);
       });
 
-      archive.on('error', (err) => {
+      destStream.on('error', (err) => {
         reject(err);
       });
-
-      archive.finalize();
-    } catch (error) {
-      reject(error);
-    }
-  });
+    });
+  } catch (error) {
+    throw error;
+  }
 }
 
 function generateChangelog(newVersion, zipFilePath) {
