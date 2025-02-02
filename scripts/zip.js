@@ -50,34 +50,35 @@ function createBinFolder() {
 }
 
 function zipExtension(newVersion) {
-  try {
-    const outputZip = path.join(binFolderPath, `extension-v${newVersion}.zip`);
-    const output = fs.createWriteStream(outputZip);
-    const archive = archiver('zip', { zlib: { level: 9 } });
+  return new Promise((resolve, reject) => {
+    try {
+      const outputZip = path.join(binFolderPath, `extension-v${newVersion}.zip`);
+      const output = fs.createWriteStream(outputZip);
+      const archive = archiver('zip', { zlib: { level: 9 } });
 
-    archive.pipe(output);
+      archive.pipe(output);
 
-    archive.glob([
-      './assets/**/*',
-      './src/**/*',
-      './manifest.json',
-    ], { cwd: extensionDir });
+      archive.glob([
+        './assets/**/*',
+        './src/**/*',
+        './manifest.json',
+      ], { cwd: extensionDir });
 
-    output.on('close', () => {
-      console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
-      console.log(`Zip file saved to: ${outputZip}`);
-    });
+      output.on('close', () => {
+        console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
+        console.log(`Zip file saved to: ${outputZip}`);
+        resolve(outputZip); // Resolve the promise with the path to the zipped file
+      });
 
-    archive.on('error', (err) => {
-      throw err;
-    });
+      archive.on('error', (err) => {
+        reject(err); // Reject the promise if there's an error
+      });
 
-    archive.finalize();
-    return outputZip; // Return the path to the zipped file
-  } catch (error) {
-    console.error('Error zipping extension:', error);
-    throw error;
-  }
+      archive.finalize();
+    } catch (error) {
+      reject(error); // Reject the promise if there's an error
+    }
+  });
 }
 
 function generateChangelog(newVersion, zipFilePath) {
@@ -102,11 +103,11 @@ function generateChangelog(newVersion, zipFilePath) {
   }
 }
 
-function main() {
+async function main() {
   try {
     const newVersion = incrementVersion();
     createBinFolder();
-    const zipFilePath = zipExtension(newVersion);
+    const zipFilePath = await zipExtension(newVersion); // Wait for the zip process to complete
     generateChangelog(newVersion, zipFilePath);
     process.exit(0);
   } catch (error) {
