@@ -9,7 +9,8 @@
   "scripts": {
     "release": "node scripts/release.js",
     "clean": "node scripts/clean.js",
-    "rmds": "find . -name '.DS_Store' -delete"
+    "rmds": "find . -name '.DS_Store' -delete",
+    "test": "node --no-warnings --test ./tests/*test.js"
   },
   "keywords": [
     "openai",
