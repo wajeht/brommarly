@@ -10,15 +10,15 @@ function resetVersion() {
   try {
     // Reset package.json version
     const packageJson = require(packageJsonPath);
-    packageJson.version = '0.0.1';
+    packageJson.version = '0.0.0';
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     // Reset manifest.json version
     const manifestJson = require(manifestJsonPath);
-    manifestJson.version = '0.0.1';
+    manifestJson.version = '0.0.0';
     fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
 
-    console.log('Version reset to 0.0.1 in package.json and manifest.json');
+    console.log('Version reset to 0.0.0 in package.json and manifest.json');
   } catch (error) {
     console.error('Error resetting version:', error);
   }
