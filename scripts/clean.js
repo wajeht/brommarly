@@ -6,7 +6,7 @@ const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
 const binFolderPath = path.join(__dirname, '../bin');
 
-const resetVersion = () => {
+function resetVersion() {
   try {
     // Reset package.json version
     const packageJson = require(packageJsonPath);
@@ -22,9 +22,9 @@ const resetVersion = () => {
   } catch (error) {
     console.error('Error resetting version:', error);
   }
-};
+}
 
-const deleteGitTags = () => {
+function deleteGitTags() {
   try {
     // Delete local tags
     const tags = execSync('git tag', { encoding: 'utf-8' }).trim().split('\n');
@@ -50,9 +50,9 @@ const deleteGitTags = () => {
   } catch (error) {
     console.error('Error deleting git tags:', error.message);
   }
-};
+}
 
-const cleanBinFolder = () => {
+function cleanBinFolder() {
   try {
     if (fs.existsSync(binFolderPath)) {
       fs.rmSync(binFolderPath, { recursive: true, force: true });
@@ -62,12 +62,12 @@ const cleanBinFolder = () => {
   } catch (error) {
     console.error('Error cleaning bin folder:', error);
   }
-};
+}
 
-const main = () => {
+function main() {
   resetVersion();
   deleteGitTags();
   cleanBinFolder();
-};
+}
 
 main();

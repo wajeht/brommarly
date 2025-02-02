@@ -7,7 +7,7 @@ const manifestJsonPath = path.join(__dirname, '../manifest.json');
 const binFolderPath = path.join(__dirname, '../bin');
 const extensionDir = path.join(__dirname, '..');
 
-const incrementVersion = () => {
+function incrementVersion() {
   try {
     // Read and update package.json version
     const packageJson = require(packageJsonPath);
@@ -28,15 +28,15 @@ const incrementVersion = () => {
     console.error('Error incrementing version:', error);
     throw error;
   }
-};
+}
 
-const incrementPatchVersion = (currentVersion) => {
+function incrementPatchVersion(currentVersion) {
   const versionParts = currentVersion.split('.').map(Number);
   versionParts[2] += 1;  // Increment patch version
   return versionParts.join('.');
-};
+}
 
-const createBinFolder = () => {
+function createBinFolder() {
   try {
     if (!fs.existsSync(binFolderPath)) {
       console.log('Creating /bin folder...');
@@ -46,9 +46,9 @@ const createBinFolder = () => {
     console.error('Error creating bin folder:', error);
     throw error;
   }
-};
+}
 
-const zipExtension = (newVersion) => {
+function zipExtension(newVersion) {
   try {
     const outputZip = path.join(binFolderPath, `extension-v${newVersion}.zip`);
     const output = fs.createWriteStream(outputZip);
@@ -76,21 +76,18 @@ const zipExtension = (newVersion) => {
     console.error('Error zipping extension:', error);
     throw error;
   }
-};
+}
 
-const main = () => {
+function main() {
   try {
     const newVersion = incrementVersion();
-
     createBinFolder();
-
     zipExtension(newVersion);
-
     process.exit(0);
   } catch (error) {
     console.error('Error in main function:', error);
     process.exit(1);
   }
-};
+}
 
 main();
