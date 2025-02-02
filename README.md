@@ -4,6 +4,7 @@ https://github.com/user-attachments/assets/69f13181-02f4-4fa8-b913-483b482049c7
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/wajeht/bro/blob/main/LICENSE)
 [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/wajeht/bro)
+[![Download](https://img.shields.io/badge/download-v1.0.0-blue)](https://github.com/wajeht/chad/raw/main/bin/chad-v1.0.0.zip)
 
 A personal AI assistant that seamlessly embeds into every text area
 

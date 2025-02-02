@@ -145,6 +145,40 @@ function generateChangelog(newVersion, versionType, changes) {
   }
 }
 
+function updateReadme(newVersion) {
+  try {
+    const readmePath = path.join(__dirname, '../README.md');
+    let readmeContent = fs.readFileSync(readmePath, 'utf8');
+
+    // Define the new badge with the latest version
+    const newBadge = `[![Download](https://img.shields.io/badge/download-v${newVersion}-blue)](https://github.com/wajeht/chad/raw/main/bin/chad-v${newVersion}.zip)`;
+
+    const downloadBadgeRegex = /\[!\[Download\].*?\]\(.*?\)/;
+
+    // Check if a "Download" badge already exists
+    if (downloadBadgeRegex.test(readmeContent)) {
+      // Replace the existing badge with the new one
+      readmeContent = readmeContent.replace(downloadBadgeRegex, newBadge);
+    } else {
+      // If no badge exists, insert the new badge after the "Open Source Love" badge
+      const openSourceBadgeIndex = readmeContent.indexOf('[![Open Source Love svg1]');
+      const insertPosition = readmeContent.indexOf('\n', openSourceBadgeIndex) + 1;
+
+      readmeContent =
+        readmeContent.slice(0, insertPosition) +
+        newBadge +
+        '\n' +
+        readmeContent.slice(insertPosition);
+    }
+
+    fs.writeFileSync(readmePath, readmeContent);
+    console.log('README.md updated with the latest download badge.');
+  } catch (error) {
+    console.error('Error updating README.md:', error);
+    throw error;
+  }
+}
+
 async function main() {
   try {
     const versionType = process.argv[2] || 'patch';
@@ -160,8 +194,9 @@ async function main() {
 
     const newVersion = await incrementVersion(versionType);
     createBinFolder();
-    await zipExtension(newVersion);
+    const zipFileName = await zipExtension(newVersion);
     generateChangelog(newVersion, versionType, changes);
+    updateReadme(newVersion);
     process.exit(0);
   } catch (error) {
     console.error('Error in main function:', error);
