@@ -9,6 +9,9 @@ A personal AI assistant that seamlessly embeds into every text area
 
 # 📥 Installation
 
+> [!IMPORTANT]
+> This extension is not available on the Chrome Web Store. We will not be publishing it there.
+
 1. Download the latest release from the `/bin` folder
 2. Open Google Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" in the top right corner
