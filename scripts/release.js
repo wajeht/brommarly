@@ -73,7 +73,8 @@ function createBinFolder() {
 function zipExtension(newVersion) {
   return new Promise((resolve, reject) => {
     try {
-      const outputZip = path.join(binFolderPath, `chad-v${newVersion}.zip`);
+      const zipFileName = `chad-v${newVersion}.zip`;
+      const outputZip = path.join(binFolderPath, zipFileName);
       const output = fs.createWriteStream(outputZip);
       const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -86,7 +87,7 @@ function zipExtension(newVersion) {
       output.on('close', () => {
         console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
         console.log(`Zip file saved to: ${outputZip}`);
-        resolve(outputZip);
+        resolve(zipFileName);
       });
 
       archive.on('error', (err) => {
@@ -99,20 +100,44 @@ function zipExtension(newVersion) {
   });
 }
 
-function generateChangelog(newVersion, zipFilePath) {
+function generateChangelog(newVersion, versionType, changes) {
   try {
-    const date = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
-    const fileName = path.basename(zipFilePath);
-    const relativeLink = `./bin/${fileName}`; // Relative link to the zipped file
-    const changelogEntry = `## ${newVersion} - ${date}\n\n- Initial release\n- [Download](${relativeLink})\n\n`;
+    const date = new Date().toISOString().split('T')[0];
 
+    // Create initial changelog content if file doesn't exist
     if (!fs.existsSync(changelogPath)) {
-      fs.writeFileSync(changelogPath, '# CHANGELOG\n\n');
+      const initialContent = '# Changelog\n[Download latest version](../../../bin/latest.zip)\n\n';
+      fs.writeFileSync(changelogPath, initialContent);
     }
 
-    const currentChangelog = fs.readFileSync(changelogPath, 'utf8');
-    const newChangelog = changelogEntry + currentChangelog;
+    // Generate changelog entry based on version type
+    let changelogEntry = `## [${newVersion}](../../../bin/chad-v${newVersion}.zip) - ${date}\n`;
 
+    if (versionType === 'patch') {
+      changelogEntry += `### Patch Changes\n`;
+    } else if (versionType === 'minor') {
+      changelogEntry += `### Minor Changes\n`;
+    } else if (versionType === 'major') {
+      changelogEntry += `### Major Changes\n`;
+    }
+
+    // Add changes to the changelog
+    changelogEntry += changes.map(change => `- ${change}\n`).join('');
+    // Add download link at the end of the changes
+    changelogEntry += `[Download v${newVersion}](../../../bin/chad-v${newVersion}.zip)\n\n`;
+
+    // Read existing changelog
+    let existingChangelog = fs.readFileSync(changelogPath, 'utf8');
+
+    // Find the position after the header and latest version link
+    const insertPosition = existingChangelog.indexOf('\n\n') + 2;
+
+    // Insert the new changelog entry
+    const newChangelog = existingChangelog.slice(0, insertPosition) +
+                        changelogEntry +
+                        existingChangelog.slice(insertPosition);
+
+    // Write the updated changelog to the file
     fs.writeFileSync(changelogPath, newChangelog);
     console.log(`CHANGELOG.md updated for version ${newVersion}`);
   } catch (error) {
@@ -128,10 +153,25 @@ async function main() {
       throw new Error('Invalid version type. Use major, minor, or patch.');
     }
 
+    // Example changes for the changelog (you can fetch these dynamically if needed)
+    const changes = [
+      'docs: update types definition',
+      'fix: return on production env',
+      'feat: add new feature X',
+    ];
+
     const newVersion = await incrementVersion(versionType);
     createBinFolder();
-    const zipFilePath = await zipExtension(newVersion); // Wait for the zip process to complete
-    generateChangelog(newVersion, zipFilePath);
+    const zipFileName = await zipExtension(newVersion);
+
+    // Create a symlink to the latest version
+    const latestLink = path.join(binFolderPath, 'latest.zip');
+    if (fs.existsSync(latestLink)) {
+      fs.unlinkSync(latestLink);
+    }
+    fs.symlinkSync(path.join(binFolderPath, zipFileName), latestLink);
+
+    generateChangelog(newVersion, versionType, changes);
     process.exit(0);
   } catch (error) {
     console.error('Error in main function:', error);
