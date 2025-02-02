@@ -1,6 +1,6 @@
 {
   "name": "chad",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A personal AI assistant that seamlessly embeds into every text area",
   "private": true,
   "type": "module",
