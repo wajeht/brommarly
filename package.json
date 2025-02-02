@@ -24,7 +24,7 @@
     "chatgpt-extension-chad-ai-chatgpt",
     "chatgpt-extension-chad-ai-chatgpt-extension"
   ],
-  "author": "wajeth",
+  "author": "wajeht",
   "license": "MIT",
   "devDependencies": {
     "archiver": "^7.0.1"
