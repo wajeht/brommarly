@@ -106,12 +106,12 @@ function generateChangelog(newVersion, versionType, changes) {
 
     // Create initial changelog content if file doesn't exist
     if (!fs.existsSync(changelogPath)) {
-      const initialContent = '# Changelog\n[Download latest version](../../../bin/latest.zip)\n\n';
+      const initialContent = '# Changelog\n\n';
       fs.writeFileSync(changelogPath, initialContent);
     }
 
     // Generate changelog entry based on version type
-    let changelogEntry = `## [${newVersion}](../../../bin/chad-v${newVersion}.zip) - ${date}\n`;
+    let changelogEntry = `## [${newVersion}](bin/chad-v${newVersion}.zip) - ${date}\n`;
 
     if (versionType === 'patch') {
       changelogEntry += `### Patch Changes\n`;
@@ -123,13 +123,12 @@ function generateChangelog(newVersion, versionType, changes) {
 
     // Add changes to the changelog
     changelogEntry += changes.map(change => `- ${change}\n`).join('');
-    // Add download link at the end of the changes
-    changelogEntry += `[Download v${newVersion}](../../../bin/chad-v${newVersion}.zip)\n\n`;
+    changelogEntry += `\n[Download v${newVersion}](bin/chad-v${newVersion}.zip)\n\n`;
 
     // Read existing changelog
     let existingChangelog = fs.readFileSync(changelogPath, 'utf8');
 
-    // Find the position after the header and latest version link
+    // Find the position after the header
     const insertPosition = existingChangelog.indexOf('\n\n') + 2;
 
     // Insert the new changelog entry
@@ -162,15 +161,7 @@ async function main() {
 
     const newVersion = await incrementVersion(versionType);
     createBinFolder();
-    const zipFileName = await zipExtension(newVersion);
-
-    // Create a symlink to the latest version
-    const latestLink = path.join(binFolderPath, 'latest.zip');
-    if (fs.existsSync(latestLink)) {
-      fs.unlinkSync(latestLink);
-    }
-    fs.symlinkSync(path.join(binFolderPath, zipFileName), latestLink);
-
+    await zipExtension(newVersion);
     generateChangelog(newVersion, versionType, changes);
     process.exit(0);
   } catch (error) {
