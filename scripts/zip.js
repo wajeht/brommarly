@@ -9,20 +9,15 @@ const extensionDir = path.join(__dirname, '..');
 
 const incrementVersion = () => {
   try {
-    // Read package.json
+    // Read and update package.json version
     const packageJson = require(packageJsonPath);
     const currentVersion = packageJson.version;
+    const newVersion = incrementPatchVersion(currentVersion);
 
-    // Increment the version (e.g., 1.0.0 -> 1.0.1)
-    const versionParts = currentVersion.split('.').map(Number);
-    versionParts[2] += 1; // Increment patch version
-    const newVersion = versionParts.join('.');
-
-    // Update package.json
     packageJson.version = newVersion;
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-    // Update manifest.json
+    // Read and update manifest.json version
     const manifestJson = require(manifestJsonPath);
     manifestJson.version = newVersion;
     fs.writeFileSync(manifestJsonPath, JSON.stringify(manifestJson, null, 2));
@@ -35,6 +30,12 @@ const incrementVersion = () => {
   }
 };
 
+const incrementPatchVersion = (currentVersion) => {
+  const versionParts = currentVersion.split('.').map(Number);
+  versionParts[2] += 1;  // Increment patch version
+  return versionParts.join('.');
+};
+
 const createBinFolder = () => {
   try {
     if (!fs.existsSync(binFolderPath)) {
@@ -42,18 +43,24 @@ const createBinFolder = () => {
       fs.mkdirSync(binFolderPath);
     }
   } catch (error) {
-    console.error('Error creating /bin folder:', error);
+    console.error('Error creating bin folder:', error);
     throw error;
   }
 };
 
 const zipExtension = (newVersion) => {
   try {
-    console.log('Zipping extension...');
-
     const outputZip = path.join(binFolderPath, `extension-v${newVersion}.zip`);
     const output = fs.createWriteStream(outputZip);
     const archive = archiver('zip', { zlib: { level: 9 } });
+
+    archive.pipe(output);
+
+    archive.glob([
+      './assets/**/*',
+      './src/**/*',
+      './manifest.json',
+    ], { cwd: extensionDir });
 
     output.on('close', () => {
       console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
@@ -64,15 +71,6 @@ const zipExtension = (newVersion) => {
       throw err;
     });
 
-    // Add files to the zip (exclude unnecessary files/folders)
-    archive.pipe(output);
-
-    archive.glob([
-      'assets/**/*',     // Include all files inside assets folder
-      'src/**/*',         // Include all files inside src folder
-      'manifest.json',    // Include manifest.json file
-    ], { cwd: extensionDir });  // Working directory for the glob patterns
-
     archive.finalize();
   } catch (error) {
     console.error('Error zipping extension:', error);
@@ -80,16 +78,17 @@ const zipExtension = (newVersion) => {
   }
 };
 
-const main = async () => {
+const main = () => {
   try {
     const newVersion = incrementVersion();
 
     createBinFolder();
 
     zipExtension(newVersion);
+
     process.exit(0);
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in main function:', error);
     process.exit(1);
   }
 };
