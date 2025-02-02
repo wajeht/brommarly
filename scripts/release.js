@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const compressing = require('compressing');
+const archiver = require('archiver');
 
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
@@ -66,33 +66,33 @@ function createBinFolder() {
   }
 }
 
-async function zipExtension(newVersion) {
-  try {
-    const outputZip = path.join(binFolderPath, `chad-v${newVersion}.zip`);
-    const zipStream = new compressing.zip.Stream();
+function zipExtension(newVersion) {
+  return new Promise((resolve, reject) => {
+    try {
+      const outputZip = path.join(binFolderPath, `chad-v${newVersion}.zip`);
+      const output = fs.createWriteStream(outputZip);
+      const archive = archiver('zip', { zlib: { level: 9 } });
 
-    // Add directories and files to the zip stream
-    zipStream.addEntry(path.join(extensionDir, 'assets'), { relativePath: 'assets' });
-    zipStream.addEntry(path.join(extensionDir, 'src'), { relativePath: 'src' });
-    zipStream.addEntry(path.join(extensionDir, 'manifest.json'), { relativePath: 'manifest.json' });
+      archive.pipe(output);
 
-    // Write the zip stream to a file
-    const destStream = fs.createWriteStream(outputZip);
-    zipStream.pipe(destStream);
+      archive.directory(path.join(extensionDir, 'assets'), 'assets');
+      archive.directory(path.join(extensionDir, 'src'), 'src');
+      archive.file(path.join(extensionDir, 'manifest.json'), { name: 'manifest.json' });
 
-    return new Promise((resolve, reject) => {
-      destStream.on('close', () => {
-        console.log(`Extension zipped successfully: ${outputZip}`);
+      output.on('close', () => {
+        console.log(`Extension zipped successfully: ${archive.pointer()} total bytes`);
+        console.log(`Zip file saved to: ${outputZip}`);
         resolve(outputZip);
       });
 
-      destStream.on('error', (err) => {
+      archive.on('error', (err) => {
         reject(err);
       });
-    });
-  } catch (error) {
-    throw error;
-  }
+      archive.finalize();
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 function generateChangelog(newVersion, zipFilePath) {

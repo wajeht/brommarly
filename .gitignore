@@ -1,1 +1,7 @@
 node_modules
+
+# Ignore everything in the bin/ folder
+bin/*
+
+# Except .zip files in the bin/ folder
+!bin/*.zip
