@@ -68,6 +68,103 @@
         button:active {
             background-color: #2a56c7;
         }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper label {
+            padding: 0px;
+            margin: 0px;
+            display: inline;
+            cursor: pointer;
+        }
+
+        .domain-selectors {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+
+        .domain-group {
+            margin-bottom: 5px;
+        }
+
+        .domain-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .selector-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+            padding: 5px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .delete-selector {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 6px;
+            width: fit-content;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-selector:hover {
+            background: #cc0000;
+        }
+
+        .no-selectors {
+            color: #666;
+            font-style: italic;
+            padding: 8px 0;
+        }
+
+        .selector-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .selector-text {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .url-text {
+            font-size: 11px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .selector-item {
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
     </style>
 </head>
 
@@ -92,9 +189,12 @@
     </div>
 
     <div class="form-group">
-        <label for="ignoredUrls">Ignored URLs <span class="optional">(separate by new line)</span></label>
-        <textarea id="ignoredUrls" placeholder="Enter URLs to ignore"></textarea>
+        <label>Saved Elements by Domain</label>
+        <div id="domainSelectors" class="domain-selectors">
+        </div>
     </div>
+
+    <button id="toggleSelector" style="margin-bottom: 15px;">Enable Element Selector</button>
 
     <button id="saveSettings">Save</button>
     <script src="popup.js"></script>
