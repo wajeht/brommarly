@@ -1,3 +1,5 @@
+https://github.com/user-attachments/assets/5519fcd4-53fe-41e2-b437-d1b7da82eb08
+
 # 🗿 Chad
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/wajeht/bro/blob/main/LICENSE)
