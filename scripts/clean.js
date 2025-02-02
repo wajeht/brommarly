@@ -5,6 +5,7 @@ const { execSync } = require('child_process');
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
 const binFolderPath = path.join(__dirname, '../bin');
+const changelogPath = path.join(__dirname, '../CHANGELOG.md');
 
 function resetVersion() {
   try {
@@ -64,10 +65,24 @@ function cleanBinFolder() {
   }
 }
 
+function deleteChangelog() {
+  try {
+    if (fs.existsSync(changelogPath)) {
+      fs.rmSync(changelogPath, { force: true });
+      console.log('CHANGELOG.md deleted.');
+    } else {
+      console.log('CHANGELOG.md does not exist, skipping deletion.');
+    }
+  } catch (error) {
+    console.error('Error deleting CHANGELOG.md:', error);
+  }
+}
+
 function main() {
   resetVersion();
   deleteGitTags();
   cleanBinFolder();
+  deleteChangelog();
 }
 
 main();

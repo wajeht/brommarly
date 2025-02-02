@@ -5,6 +5,7 @@ const archiver = require('archiver');
 const packageJsonPath = path.join(__dirname, '../package.json');
 const manifestJsonPath = path.join(__dirname, '../manifest.json');
 const binFolderPath = path.join(__dirname, '../bin');
+const changelogPath = path.join(__dirname, '../CHANGELOG.md');
 const extensionDir = path.join(__dirname, '..');
 
 function incrementVersion() {
@@ -72,8 +73,31 @@ function zipExtension(newVersion) {
     });
 
     archive.finalize();
+    return outputZip; // Return the path to the zipped file
   } catch (error) {
     console.error('Error zipping extension:', error);
+    throw error;
+  }
+}
+
+function generateChangelog(newVersion, zipFilePath) {
+  try {
+    const date = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+    const fileName = path.basename(zipFilePath);
+    const relativeLink = `./bin/${fileName}`; // Relative link to the zipped file
+    const changelogEntry = `## ${newVersion} - ${date}\n\n- Initial release\n- [Download](${relativeLink})\n\n`;
+
+    if (!fs.existsSync(changelogPath)) {
+      fs.writeFileSync(changelogPath, '# CHANGELOG\n\n');
+    }
+
+    const currentChangelog = fs.readFileSync(changelogPath, 'utf8');
+    const newChangelog = changelogEntry + currentChangelog;
+
+    fs.writeFileSync(changelogPath, newChangelog);
+    console.log(`CHANGELOG.md updated for version ${newVersion}`);
+  } catch (error) {
+    console.error('Error generating CHANGELOG:', error);
     throw error;
   }
 }
@@ -82,7 +106,8 @@ function main() {
   try {
     const newVersion = incrementVersion();
     createBinFolder();
-    zipExtension(newVersion);
+    const zipFilePath = zipExtension(newVersion);
+    generateChangelog(newVersion, zipFilePath);
     process.exit(0);
   } catch (error) {
     console.error('Error in main function:', error);
