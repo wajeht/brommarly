@@ -7,14 +7,20 @@
     "doc": "docs"
   },
   "scripts": {
-    "zip": "node scripts/zip.js",
+    "release": "node scripts/release.js",
     "clean": "node scripts/clean.js",
     "rmds": "find . -name '.DS_Store' -delete"
   },
   "keywords": [
     "openai",
     "claude",
-    "ai"
+    "ai",
+    "chatgpt",
+    "chatgpt-extension",
+    "chatgpt-extension-chad",
+    "chatgpt-extension-chad-ai",
+    "chatgpt-extension-chad-ai-chatgpt",
+    "chatgpt-extension-chad-ai-chatgpt-extension"
   ],
   "author": "wajeth",
   "license": "MIT",
