@@ -329,25 +329,21 @@ async function handleSelectorClick(e) {
     const hasBubble = e.target.hasAttribute('data-chad-id');
 
     if (!isValidType || hasBubble) {
-        alert('Invalid input type or already has bubble');
         disableSelectorMode();
-        return; // Early return if not valid or already has bubble
+        alert('Invalid input type or already has bubble');
+        return;
     }
 
     const element = e.target;
     await saveDomainSelector(element);
     createButton(element);
 
-    // Send message to popup to refresh the display
     chrome.runtime.sendMessage({ action: 'refreshPopup' });
 
-    // Disable selector mode
     disableSelectorMode();
 
-    // Send message to update the toggle button in popup
     chrome.runtime.sendMessage({ action: 'updateToggleButton' });
 
-    // Save settings immediately
     const settings = await getSettings();
     await chrome.storage.sync.set(settings);
 }
@@ -462,13 +458,11 @@ async function saveDomainSelector(element) {
         settings.domainSelectors[domain] = [];
     }
 
-    // Store both selector and full URL
     const selectorData = {
         selector: selector,
         url: fullUrl
     };
 
-    // Check if this selector already exists
     const exists = settings.domainSelectors[domain].some(
         item => item.selector === selector && item.url === fullUrl
     );
@@ -505,7 +499,6 @@ async function restoreSavedSelectors() {
 
                 if (element) {
                     const existingId = element.getAttribute('data-chad-id');
-                    // Only create button if it doesn't already exist
                     if (!existingId || !existingButtonIds.has(existingId)) {
                         await createButton(element);
                     }
@@ -542,29 +535,13 @@ async function deleteSelector(domain, index) {
     }
 }
 
-function waitForElement(selector, callback, timeout = 2000) {
-    const startTime = Date.now();
-
-    const checkElement = () => {
-        const element = document.querySelector(selector);
-        if (element) {
-            callback(element);
-            return;
-        }
-
-        if (Date.now() - startTime >= timeout) {
-            console.log('Element not found:', selector);
-            return;
-        }
-
-        requestAnimationFrame(checkElement);
-    };
-
-    checkElement();
+async function initializePage() {
+    await restoreSavedSelectors();
+    setupStorageListener();
+    setupMutationObserver();
 }
 
 async function main() {
-    // Wait for DOM to be fully loaded
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', async () => {
             await initializePage();
@@ -572,12 +549,6 @@ async function main() {
     } else {
         await initializePage();
     }
-}
-
-async function initializePage() {
-    await restoreSavedSelectors();
-    setupStorageListener();
-    setupMutationObserver();
 }
 
 main();
