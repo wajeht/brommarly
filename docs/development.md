@@ -51,6 +51,12 @@ If you encounter any issues:
 
 ## Release
 
+
+To clean all the files in the `bin` folder, reset version in `package.json` and `manifest.json`, run:
+```bash
+$ npm run clean
+```
+
 To release a new version, run:
 ```bash
 $ npm run release <version-type>
